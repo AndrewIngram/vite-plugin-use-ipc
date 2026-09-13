@@ -1,4 +1,4 @@
-import { mkdtemp, cp, rm } from 'node:fs/promises';
+import { mkdtemp, cp, rm, realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -15,7 +15,10 @@ const packageRoot = path.dirname(
 );
 
 export async function electronTests() {
-  const temporary = await mkdtemp(path.join(tmpdir(), 'use-ipc-electron-'));
+  const temporary = await realpath(
+    await mkdtemp(path.join(tmpdir(), 'use-ipc-electron-')),
+  );
+
   let server;
 
   try {

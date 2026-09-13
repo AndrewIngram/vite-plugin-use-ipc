@@ -156,6 +156,18 @@ app
     const next = stream.next();
     controller.abort();
     assert.equal((await next).done, true);
+
+    assert.notEqual(Symbol.asyncDispose, undefined);
+
+    const disposable = callRenderer(
+      first,
+      sequence,
+      new AbortController().signal,
+    );
+
+    await disposable.next();
+    await disposable[Symbol.asyncDispose]();
+    assert.equal((await disposable.next()).done, true);
     await callRenderer(first, startIdle);
     await until(() => waiting === 1);
     assert.equal(subscriptions, 1);

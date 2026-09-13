@@ -9,14 +9,14 @@ importers:
   .:
     dependencies:
       '@jridgewell/remapping':
-        specifier: 2.3.5
+        specifier: ^2.3.1
         version: 2.3.5
       magic-string:
-        specifier: 0.30.21
+        specifier: ^0.30.1
         version: 0.30.21
       tinyglobby:
-        specifier: 0.2.15
-        version: 0.2.15
+        specifier: ^0.2.15
+        version: 0.2.17
     devDependencies:
       '@electron/asar':
         specifier: ^4.0.1
@@ -920,10 +920,6 @@ packages:
     resolution: {integrity: sha512-MvjXzkz/BOfyVDkG0oFOtBxHX2u3gKbMHIF/dXblZsgD3BWOFLmHovIpZY7BykJdAjcqRCBi1WYBNdEC9yI7vg==}
     engines: {node: '>= 8.0'}
 
-  tinyglobby@0.2.15:
-    resolution: {integrity: sha512-j2Zq4NyQYG5XMST4cbs02Ak8iJUdxRM0XI5QyxXuZOzKOINmWurp3smXu3y5wDcJrptwpSjgXHzIQxR0omXljQ==}
-    engines: {node: '>=12.0.0'}
-
   tinyglobby@0.2.17:
     resolution: {integrity: sha512-wXR/dYpcqKmfWpEdZjiKJOwCNFndD0DMnrW/cYjVGttEkBfVgcLFHoNrlj47mjOVic9yyNu65alsgF4NQyTa2g==}
     engines: {node: '>=12.0.0'}
@@ -1640,11 +1636,6 @@ snapshots:
       debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
-
-  tinyglobby@0.2.15:
-    dependencies:
-      fdir: 6.5.0(picomatch@4.0.7)
-      picomatch: 4.0.7
 
   tinyglobby@0.2.17:
     dependencies:

@@ -48,6 +48,15 @@ export async function probe() {
 
   for await (const value of numbers()) values.push(value);
 
+  if (Symbol.asyncDispose === undefined)
+    throw new Error('Renderer does not support Symbol.asyncDispose');
+  const disposable = numbers();
+  await disposable.next();
+  await disposable[Symbol.asyncDispose]();
+
+  if (!(await disposable.next()).done)
+    throw new Error('Disposed renderer iterator remained open');
+
   return {
     value: new Uint8Array(receivedBuffer)[0],
     bytes: buffer.byteLength,

@@ -60,7 +60,7 @@ There are no retries, deadlines for calls, negotiation, reconnect loops, state r
 
 IPC edits, additions, and deletions refresh discovery and request a full renderer reload. Main-owned edits also require a main rebuild and process restart, owned by the application. Two watchers can temporarily see different revisions. IDs hash relative filename and exact source text; comments change IDs, dependency-only edits do not.
 
-This repository pins Node 24.19.0 through pnpm, Vite 8.3.0, and Electron 44.3.0. Compatibility claims are limited to the tested versions and local platform; other operating systems need their own Electron runs.
+This repository pins Node 24.19.0 through pnpm, Vite 8.3.0, and Electron 44.3.0 for development. The package also supports Node 20.19 or later in the Node 20 series, Node 22.12 or later, Vite 8, and Electron 35 or later. The minimum versions and development versions are tested on macOS arm64. Other operating systems need their own Electron runs. See [dependency requirements](dependency-requirements.md) for the reasons behind each minimum.
 
 ```sh
 pnpm install
@@ -69,6 +69,7 @@ pnpm typecheck
 pnpm test
 pnpm test:electron
 pnpm test:package
+pnpm test:minimum
 ```
 
 See the [basic example](../examples/basic) and [implementation notes](implementation-notes.md).

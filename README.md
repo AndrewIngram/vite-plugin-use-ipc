@@ -45,7 +45,7 @@ A line such as `'use ipc:main'` tells the plugin where a file's exported functio
 
 ## Try the example
 
-The current version is `0.1.0-beta.1`. It has not been published yet. From a checkout of this repository, run:
+From a checkout of this repository, run:
 
 ```sh
 pnpm install
@@ -62,13 +62,19 @@ The [complete example](examples/basic) includes the build configuration, HTML fi
 
 The following setup uses **electron-vite**, which builds main, preload, and renderer code together. It assumes you already have an Electron app.
 
-Until the package is published, build this repository and install it from its local path:
+Install the beta release:
 
 ```sh
-pnpm add -D /absolute/path/to/vite-plugin-use-ipc
+pnpm add -D vite-plugin-use-ipc@0.1.0-beta.1
 ```
 
-Use the versions listed above for this beta. Other versions and operating systems need their own testing.
+The package requires:
+
+- Node 20.19 or later in the Node 20 series, or Node 22.12 or later.
+- Vite 8.0 or later in the Vite 8 series.
+- Electron 35 or later, which provides the browser APIs used for iterator cleanup.
+
+The example uses newer versions. The minimum versions and the example's versions are tested on macOS arm64. Windows and Linux still need their own Electron test runs.
 
 ### 1. Configure both builds
 
@@ -524,8 +530,9 @@ For checks that launch Electron:
 ```sh
 pnpm test:electron
 pnpm test:package
+pnpm test:minimum
 ```
 
-The first command tests real Electron connections. The second installs a package archive into a temporary app and tests development and packaged builds. Both download the configured Electron binary if needed.
+`test:electron` tests real Electron connections. `test:package` installs a package archive into a temporary app and tests development and packaged builds. `test:minimum` tests the declared minimum dependencies on Node 20.19 and 22.12, then runs the Electron checks on Electron 35. These commands download the required Node or Electron binaries if needed.
 
 See the [implementation notes](docs/implementation-notes.md) for design decisions and [the specification](use-ipc-spec.md) for the full behavior contract.
