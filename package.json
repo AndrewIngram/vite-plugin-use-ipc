@@ -1,13 +1,23 @@
 {
   "name": "vite-plugin-use-ipc",
-  "version": "0.1.0-beta.1",
+  "version": "0.1.0-beta.2",
   "description": "Directive-based Electron IPC for Vite",
   "type": "module",
   "files": [
     "dist",
     "README.md",
     "LICENSE",
-    "THIRD_PARTY_NOTICES.md"
+    "THIRD_PARTY_NOTICES.md",
+    "docs/detailed-behavior.md",
+    "docs/implementation-notes.md",
+    "docs/dependency-requirements.md",
+    "use-ipc-spec.md",
+    "examples/basic/README.md",
+    "examples/basic/electron.vite.config.mts",
+    "examples/basic/index.html",
+    "examples/basic/package.json",
+    "examples/basic/tsconfig.json",
+    "examples/basic/src"
   ],
   "exports": {
     ".": {
@@ -86,5 +96,13 @@
     "typescript"
   ],
   "packageManager": "pnpm@10.14.0",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AndrewIngram/vite-plugin-use-ipc.git"
+  },
+  "homepage": "https://github.com/AndrewIngram/vite-plugin-use-ipc#readme",
+  "bugs": {
+    "url": "https://github.com/AndrewIngram/vite-plugin-use-ipc/issues"
+  }
 }

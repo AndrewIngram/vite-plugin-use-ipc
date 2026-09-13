@@ -1,4 +1,5 @@
 import {
+  access,
   mkdtemp,
   mkdir,
   cp,
@@ -63,8 +64,6 @@ try {
   );
   await cp(path.join(repository, '.npmrc'), path.join(consumer, '.npmrc'));
   await pnpm(['install', '--no-frozen-lockfile'], consumer);
-  // pnpm 10 may skip lifecycle scripts. Provision only the declared Electron binary.
-  await pnpm(['exec', 'node', 'node_modules/electron/install.js'], consumer);
   const installed = path.join(consumer, 'node_modules/vite-plugin-use-ipc');
 
   const manifest = JSON.parse(
@@ -85,11 +84,57 @@ try {
         const text = await readFile(filename, 'utf8');
         assert.ok(!text.includes(repository), `Checkout path in ${filename}`);
         assert.doesNotMatch(text, /\/Users\/[a-z][^\s"']*|[A-Z]:\\Users\\/i);
+
+        if (filename.endsWith('.map')) {
+          const map = JSON.parse(text);
+
+          for (const [index, source] of map.sources.entries()) {
+            if (map.sourcesContent?.[index] != null) {
+              assert.match(map.sourcesContent[index], /^[\s\S]*$/);
+              continue;
+            }
+
+            const target = path.resolve(
+              path.dirname(filename),
+              map.sourceRoot ?? '',
+              source,
+            );
+
+            assert.ok(
+              target.startsWith(installed + path.sep),
+              `Source escapes package: ${target}`,
+            );
+            await access(target);
+          }
+        }
+
+        if (filename.endsWith('.md')) {
+          for (const [, link] of text.matchAll(/\]\(([^)]+)\)/g)) {
+            const target = link.split('#')[0];
+
+            if (!target || /^[a-z]+:/i.test(target)) continue;
+            await access(path.resolve(path.dirname(filename), target));
+          }
+        }
       }
     }
   }
 
   await audit(installed);
+  assert.equal(
+    manifest.repository.url,
+    'git+https://github.com/AndrewIngram/vite-plugin-use-ipc.git',
+  );
+  assert.equal(
+    manifest.homepage,
+    'https://github.com/AndrewIngram/vite-plugin-use-ipc#readme',
+  );
+  assert.equal(
+    manifest.bugs.url,
+    'https://github.com/AndrewIngram/vite-plugin-use-ipc/issues',
+  );
+  // pnpm 10 may skip lifecycle scripts. Provision only the declared Electron binary.
+  await pnpm(['exec', 'node', 'node_modules/electron/install.js'], consumer);
   await writeFile(
     path.join(consumer, 'types.ts'),
     `import 'virtual:use-ipc/register';

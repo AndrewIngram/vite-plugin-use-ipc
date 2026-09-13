@@ -65,7 +65,7 @@ The following setup uses **electron-vite**, which builds main, preload, and rend
 Install the beta release:
 
 ```sh
-pnpm add -D vite-plugin-use-ipc@0.1.0-beta.1
+pnpm add -D vite-plugin-use-ipc@0.1.0-beta.2
 ```
 
 The package requires:

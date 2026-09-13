@@ -347,15 +347,49 @@ export default function useIpc(options: IpcOptions): Plugin {
       server = current;
       current.watcher.add(root);
 
+      let pendingChanges = Promise.resolve();
+
       const changed = (file: string) => {
-        if (
-          !file.startsWith(root + path.sep) ||
-          file.includes('/node_modules/') ||
-          !extension.test(file)
-        )
-          return;
-        void rescan()
-          .then(() => {
+        if (file.includes('/node_modules/')) return;
+        pendingChanges = pendingChanges
+          .then(async () => {
+            const filename = await canonical(file);
+
+            const pending = [
+              ...(current.moduleGraph.getModulesByFile(filename) ?? []),
+            ];
+
+            const visited = new Set<(typeof pending)[number]>();
+            let dependencyChanged = false;
+
+            // Walk importers so transitive dependencies and non-JavaScript assets count.
+            for (const node of pending) {
+              if (visited.has(node)) continue;
+              visited.add(node);
+
+              if (
+                node.file &&
+                modules.get(node.file)?.target === options.target
+              ) {
+                dependencyChanged = true;
+                break;
+              }
+
+              pending.push(...node.importers);
+            }
+
+            const previous = modules;
+
+            if (await affectsDiscovery(file)) await rescan();
+
+            const discoveryChanged =
+              previous.size !== modules.size ||
+              [...previous].some(
+                ([name, module]) => modules.get(name)?.key !== module.key,
+              );
+
+            if (!discoveryChanged && !dependencyChanged) return;
+
             for (const module of current.moduleGraph.idToModuleMap.values()) {
               if (module.id === register || module.id?.startsWith(entryPrefix))
                 current.moduleGraph.invalidateModule(module);

@@ -1,6 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, writeFile, readFile, rm } from 'node:fs/promises';
+import {
+  mkdtemp,
+  mkdir,
+  writeFile,
+  readFile,
+  rm,
+  realpath,
+  symlink,
+} from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { build, createServer } from 'vite';
@@ -9,7 +17,10 @@ import { until } from './helpers.mjs';
 import { setTimeout as delay } from 'node:timers/promises';
 
 async function fixture(t) {
-  const root = await mkdtemp(path.join(tmpdir(), 'use-ipc-vite-'));
+  const root = await realpath(
+    await mkdtemp(path.join(tmpdir(), 'use-ipc-vite-')),
+  );
+
   t.after(() => rm(root, { recursive: true, force: true }));
   await mkdir(path.join(root, 'src/ipc'), { recursive: true });
   await mkdir(path.join(root, 'renderer'));
@@ -523,4 +534,93 @@ test('production discovery removes handlers when their included symlink is delet
     await readFile(path.join(root, 'implementation.ts'), 'utf8'),
     /removedHandler/,
   );
+});
+
+test('development reloads only for IPC changes and implementation dependencies', async (t) => {
+  const { root, write } = await fixture(t);
+  await write(
+    'src/ipc/handler.ts',
+    '"use ipc:renderer"; import {value} from "../helper"; export async function run(){return value}',
+  );
+  await write(
+    'src/helper.ts',
+    'export {value} from "./data.json"; if(import.meta.hot) import.meta.hot.accept();',
+  );
+  await write('src/data.json', '{"value":1}');
+  await write('src/unrelated.ts', 'export const value=1;');
+  await write('src/ipc/plain.ts', 'export const value=1;');
+
+  const server = await createServer({
+    configFile: false,
+    root,
+    logLevel: 'silent',
+    plugins: [useIpc({ root, target: 'renderer', include: ['src/ipc/*.ts'] })],
+    optimizeDeps: { noDiscovery: true, include: [] },
+    server: { host: '127.0.0.1', port: 0 },
+  });
+
+  t.after(() => server.close());
+  await server.listen();
+  await server.transformRequest('/src/ipc/handler.ts');
+  await server.transformRequest('/src/helper.ts');
+  await server.transformRequest('/src/data.json');
+  const events = [];
+  server.watcher.on('all', (event, file) => events.push([event, file]));
+  const reloads = [];
+  const send = server.ws.send.bind(server.ws);
+  server.ws.send = (...args) => {
+    if (args[0]?.type === 'full-reload') reloads.push(args[0]);
+
+    return send(...args);
+  };
+
+  await delay(150);
+
+  async function change(file, source, reload) {
+    events.length = 0;
+    reloads.length = 0;
+
+    if (source === null) await rm(path.join(root, file));
+    else await write(file, source);
+    await until(() => events.some(([, name]) => name.endsWith('/' + file)));
+
+    if (reload) await until(() => reloads.length > 0);
+    else {
+      await delay(250);
+      assert.equal(reloads.length, 0, file);
+    }
+  }
+
+  await change('src/unrelated.ts', 'export const value=2;', false);
+  await change('src/ipc/plain.ts', 'export const value=2;', false);
+  await change(
+    'src/ipc/plain.ts',
+    '"use ipc:main"; export async function added(){return 1}',
+    true,
+  );
+  await change('src/ipc/plain.ts', 'export const value=3;', true);
+  await change(
+    'src/ipc/new.ts',
+    '"use ipc:main"; export async function added(){return 1}',
+    true,
+  );
+  await change('src/ipc/new.ts', null, true);
+  await change('src/data.json', '{"value":2}', true);
+  await change(
+    'src/linked.ts',
+    '"use ipc:main"; export async function linked(){return 1}',
+    false,
+  );
+  reloads.length = 0;
+  await symlink(
+    path.join(root, 'src/linked.ts'),
+    path.join(root, 'src/ipc/alias.ts'),
+  );
+  await until(() => reloads.length > 0);
+  await change(
+    'src/linked.ts',
+    '"use ipc:main"; export async function linked(){return 2}',
+    true,
+  );
+  await change('src/ipc/alias.ts', null, true);
 });

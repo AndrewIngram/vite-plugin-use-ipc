@@ -15,7 +15,7 @@ Compatible dependency updates are allowed by the package ranges. The lockfile se
 
 ## Verify the minimums
 
-Run `pnpm test:minimum`. It creates a temporary copy, installs the exact minimum direct dependencies and peers, builds against their types, and runs all 111 compiler, runtime, error, and Vite tests on Node 20.19.0 and 22.12.0. It also runs the Electron 35.0.0 fixture in custom-protocol, development-server, and ASAR modes, including iterator disposal in both directions.
+Run `pnpm test:minimum`. It creates a temporary copy, installs the exact minimum direct dependencies and peers, builds against their types, and runs all compiler, runtime, error, and Vite tests on Node 20.19.0 and 22.12.0. It also runs the Electron 35.0.0 fixture in custom-protocol, development-server, and ASAR modes, including iterator disposal in both directions.
 
 The command checks the actual Node version before running each suite. pnpm downloads the required runtimes if necessary. ASAR packaging runs under Node 22.12 because that development tool has its own Node requirement.
 
