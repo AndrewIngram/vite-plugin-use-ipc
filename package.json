@@ -1,0 +1,87 @@
+{
+  "name": "vite-plugin-use-ipc",
+  "version": "0.1.0-beta.1",
+  "description": "Directive-based Electron IPC for Vite",
+  "type": "module",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/vite.d.ts",
+      "import": "./dist/vite.js"
+    },
+    "./main": {
+      "types": "./dist/runtime/main.d.ts",
+      "import": "./dist/runtime/main.js"
+    },
+    "./preload": {
+      "types": "./dist/runtime/preload.d.ts",
+      "import": "./dist/runtime/preload.js"
+    },
+    "./renderer": {
+      "types": "./dist/runtime/renderer.d.ts",
+      "import": "./dist/runtime/renderer.js"
+    },
+    "./binding": {
+      "types": "./dist/runtime/binding.d.ts",
+      "import": "./dist/runtime/binding.js"
+    },
+    "./env": {
+      "types": "./dist/env.d.ts"
+    }
+  },
+  "sideEffects": true,
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/build.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "pnpm build && node --test tests/*.test.mjs",
+    "test:electron": "pnpm build && install-electron && node scripts/electron-test.mjs",
+    "test:package": "pnpm build && node scripts/package-test.mjs",
+    "test:unit": "pnpm build && node --test tests/compiler.test.mjs tests/runtime.test.mjs tests/errors.test.mjs",
+    "test:vite": "pnpm build && node --test tests/vite.test.mjs",
+    "lint": "oxlint .",
+    "format": "prettier --write \"{src,tests,scripts,examples}/**/*.{ts,mts,cts,js,mjs,cjs}\"",
+    "format:check": "prettier --check \"{src,tests,scripts,examples}/**/*.{ts,mts,cts,js,mjs,cjs}\""
+  },
+  "engines": {
+    "node": ">=24.19.0 <25"
+  },
+  "peerDependencies": {
+    "electron": "44.3.x",
+    "vite": "8.3.x"
+  },
+  "peerDependenciesMeta": {
+    "electron": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "@jridgewell/remapping": "2.3.5",
+    "magic-string": "0.30.21",
+    "tinyglobby": "0.2.15"
+  },
+  "devDependencies": {
+    "@electron/asar": "^4.0.1",
+    "@jridgewell/trace-mapping": "0.3.31",
+    "@oxlint/plugins": "1.82.0",
+    "@types/node": "^24.3.0",
+    "electron": "44.3.0",
+    "electron-vite": "6.0.0-beta.1",
+    "oxlint": "1.82.0",
+    "prettier": "3.9.6",
+    "typescript": "7.0.2",
+    "vite": "8.3.0"
+  },
+  "keywords": [
+    "vite-plugin",
+    "electron",
+    "ipc",
+    "typescript"
+  ],
+  "packageManager": "pnpm@10.14.0",
+  "license": "MIT"
+}

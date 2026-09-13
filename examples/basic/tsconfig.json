@@ -1,0 +1,1 @@
+{"compilerOptions":{"target":"ESNext","module":"ESNext","moduleResolution":"Bundler","strict":true,"noEmit":true,"skipLibCheck":true,"types":["node","vite/client","vite-plugin-use-ipc/env"]},"include":["src","electron.vite.config.mts"]}

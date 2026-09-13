@@ -1,0 +1,8 @@
+node_modules/
+dist/
+artifacts/
+*.tgz
+out/
+.vite/
+.pnpm-store/
+.DS_Store
